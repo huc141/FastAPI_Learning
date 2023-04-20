@@ -13,7 +13,7 @@ OAuth2PasswordBearer并不会创建相应的URL路径操作，只是指明客户
 当请求到来的时候，FASTAPI会检查请求的Authorization头信息，如果没有找到Authorization头信息，
 或者头信息的内容不是Bearer token，它会返回401状态码（unauthorized）
 """
-# 创建一个 OAuth2PasswordBearer 实例，指定 token URL。这里指定的 /token 是一个路由，该路由用于接收用户提供的用户名和密码，并返回访问令牌，以用于后续的授权访问。
+# 创建一个 OAuth2PasswordBearer 实例，指定 token URL。这里指定的 /chatpter06/token 是一个路由，该路由用于接收用户提供的用户名和密码，并返回访问令牌，以用于后续的授权访问。
 oauth2_schema = OAuth2PasswordBearer(tokenUrl="/chatpter06/token") # 请求token的URL地址 http://127.0.0.1:8000/chatpter06/token
 
 @app06.get("/oauth2_password_bearer")
@@ -45,28 +45,31 @@ fake_users_db = {
 def fake_hash_password(password: str):
     return "fakehashed" + password
 
-
+# 这个类定义了一个用户对象的数据模型，它包含了用户的用户名、电子邮件地址、全名和禁用状态。这个类继承自 Pydantic 的 BaseModel 类，这个类使我们可以方便地定义和验证数据模型。
 class User(BaseModel):
     username: str
     email: Optional[str] = None
     full_name: Optional[str] = None
     disabled: Optional[bool] = None
 
-
+# 这个类是 User 类的子类，表示数据库中的用户对象。它包含了 User 对象的所有属性，并添加了一个哈希密码属性。
 class UserInDB(User):
     hashed_password: str
 
 
 @app06.post("/token")
 async def login(form_data: OAuth2PasswordRequestForm = Depends()): # form_data 是一个 OAuth2PasswordRequestForm 类型的参数，它被声明为一个依赖项（dependency），作为一个 API 路由函数的参数，用于处理登录请求。它包含了登录请求中的用户名和密码等敏感信息，由 FastAPI 的内置解析器将它们从请求中提取并转换为 OAuth2PasswordRequestForm 对象。
+    # 它首先从 fake_users_db 数据库中获取一个字典，该字典的键是用户的用户名，并将其存储在名为 user_dict 的变量中。
     user_dict = fake_users_db.get(form_data.username) # get()是字典的一个方法，它从字典中获取一个键的值，如果该键的值不存在于字典中，则返回None。在这里，form_data.username表示表单数据中的用户名。如果该用户名存在于fake_users_db中，那么user_dict将包含该用户的字典，包括该用户的用户名、完整名称、电子邮件地址、散列密码和是否已禁用的状态。如果该用户名不存在于fake_users_db中，那么将引发一个HTTP异常并返回一个错误消息。
+    # 如果用户名无效，则 user_dict 将是一个空值，因此代码将抛出 HTTPException 异常，HTTP 状态码为 400，详细信息为 "无效的用户名或密码！"。
     if not user_dict:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="无效的用户名或密码！")
+    # 如果用户名有效，则使用 UserInDB 模型将 user_dict 转换为 UserInDB 对象。
     user = UserInDB(**user_dict)
+    # user = UserInDB(username=user_dict['username'], email=user_dict['email'], full_name=user_dict['full_name'], disabled=user_dict['disabled'], hashed_password=user_dict['hashed_password'])
     print("---------------")
     print(user)
     print("---------------")
-    # user = UserInDB(username=user_dict['username'], email=user_dict['email'], full_name=user_dict['full_name'], disabled=user_dict['disabled'], hashed_password=user_dict['hashed_password'])
     hashed_password = fake_hash_password(form_data.password)
     if not hashed_password == user.hashed_password:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="无效的用户名或密码！")
