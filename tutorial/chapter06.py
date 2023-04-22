@@ -121,7 +121,10 @@ SECRET_KEY = "09d25e094faa6ca2556c818166b7a9563b93f7099f6f0f4caa6cf63b88e8d3e7" 
 ALGORITHM = "HS256" # 算法
 ACCESS_TOKEN_EXPIRE_MINUTES = 30  # 访问令牌的过期时间（分钟）
 
-
+# .update() 是 Python 中字典的一个方法，用于更新字典中的数据。该方法接受一个字典作为参数，并将其合并到原始字典中。
+# 如果参数字典中包含原始字典中已经存在的键，则会覆盖原始字典中的值，否则会将新的键值对添加到原始字典中。
+# 例如，.update() 方法将更新原始的 fake_users_db 字典，将 "johnsnow" 用户的信息更新为指定的值。
+# 如果该用户已经存在，则将覆盖其原有的信息。
 fake_users_db.update({
     "johnsnow": {
         "username": "johnsnow",
@@ -137,6 +140,10 @@ class Token(BaseModel):
     access_token: str
     token_type: str
 
+# 使用 CryptContext() 函数，该函数是由 passlib 库提供的密码管理库，用于提供密码处理和验证的相关功能。
+# 指定哈希算法为 bcrypt，并将其作为参数传递给 schemes 参数。 bcrypt 是一种常用的密码哈希算法，可以生成安全且不可逆的哈希值。
+# 将 deprecated 参数设置为 "auto"，表示使用所有已弃用的哈希算法，并在必要时自动迁移到更强大和更安全的哈希算法。
+# 这样可以确保系统中使用的密码哈希算法始终是最新和最安全的。
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/chatpter06/jwt/token")
