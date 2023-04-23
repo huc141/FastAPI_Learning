@@ -148,8 +148,11 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/chatpter06/jwt/token")
 
+# 该函数将两个参数 plain_password 和 hashed_password 作为输入，其中 plain_password 是明文密码，hashed_password 是哈希密码。
 def verify_password(plain_password: str, hashed_password: str):
     """对密码进行校验"""
+    # pwd_context.verify() 方法将明文密码 plain_password 和哈希密码 hashed_password 作为参数传递，该方法会将明文密码进行哈希处理，
+    # 并与哈希密码进行比较。如果两者匹配，则返回 True，否则返回 False。
     return pwd_context.verify(plain_password, hashed_password)
 
 
@@ -158,7 +161,7 @@ def jwt_get_user(db, username: str):
         user_dict = db[username]
         return UserInDB(**user_dict)
     
-
+# 用于验证用户是否已注册并且密码是否正确，username：用户名。password：用户输入的密码。
 def jwt_authenticate_user(db, username: str, password: str):
     user = jwt_get_user(db=db, username=username)
     if not user:
@@ -167,35 +170,42 @@ def jwt_authenticate_user(db, username: str, password: str):
         return False
     return user
 
-
+# 用于创建 JWT 认证的 token，expires_delta：token的过期时间，可选参数，默认为 15 分钟
 def created_access_token(data: dict, expires_delta: Optional[timedelta] = None):
+    # 将data字典参数复制到新的变量to_encode中，以便稍后将其编码为JWT。
     to_encode = data.copy()
+    # 如果expires_delta存在，则表示需要设置访问令牌的过期时间。
     if expires_delta:
-        expire = datetime.utcnow() + expires_delta
+        expire = datetime.utcnow() + expires_delta # 使用当前时间和传递的expires_delta计算出访问令牌的到期时间。
     else:
-        expire = datetime.utcnow() + timedelta(minutes=15)
-    to_encode.update({"exp": expire})
-    encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
-    return encoded_jwt
+        expire = datetime.utcnow() + timedelta(minutes=15) # 如果expires_delta不存在，则将过期时间设置为15分钟。使用当前时间和15分钟计算出访问令牌的到期时间。
+    to_encode.update({"exp": expire}) # 将到期时间添加到to_encode字典中，将其作为JWT有效负载的一部分。
+    encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)  # 使用JWT库的encode函数，将to_encode字典编码为JWT字符串，并使用SECRET_KEY和ALGORITHM进行签名。
+    return encoded_jwt  # 返回编码后的JWT字符串。
 
 
+# token为请求头中的token，使用Depends进行依赖注入，即在函数调用时会自动注入oauth2_scheme。
 async def jwt_get_current_user(token: str = Depends(oauth2_scheme)):
+    # 用于在验证用户凭据失败时抛出异常。
     credentials_exception = HTTPException(
-        status_code=status.HTTP_401_UNAUTHORIZED,
+        status_code=status.HTTP_401_UNAUTHORIZED, # 设置HTTP状态码为401，表示未授权。
         detail="Could not validate credentials",
         headers={"WWW-Authenticate": "Bearer"},
     )
     try:
-        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        username: str = payload.get("sub")
-        if username is None:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM]) # 使用jwt.decode解码token，其中SECRET_KEY是用于加密和解密token的密钥，ALGORITHM是用于加密和解密的算法。
+        # 从解码后的payload中获取sub字段的值，即用户的用户名。sub是payload中的一个标准声明，表示subject，即主题，
+        # 它通常被用于指定JWT所代表的用户或其他实体。username就是作为JWT的subject来使用的，
+        # 所以在获取用户信息时，需要从payload中获取username的值，即payload.get("sub")。
+        username: str = payload.get("sub") 
+        if username is None: # 如果用户名为空，说明没有找到对应的用户，抛出credentials_exception异常。
             raise credentials_exception
-    except JWTError:
+    except JWTError: # 如果解码token失败，说明token无效，抛出credentials_exception异常
         raise credentials_exception
-    user = jwt_get_user(db=fake_users_db, username=username)
+    user = jwt_get_user(db=fake_users_db, username=username) # 获取用户名为username的用户。
     if user is None:
         raise credentials_exception
-    return user
+    return user # 如果一切正常，返回用户对象。
 
 
 async def jwt_get_current_active_user(current_user: User = Depends(jwt_get_current_user)):
@@ -216,7 +226,7 @@ async def login_for_access_token(form_data: OAuth2PasswordRequestForm=Depends())
     access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = created_access_token(
         data={"sub": user.username},
-        expires_delta=access_token_expires
+        expires_delta = access_token_expires
     )
     return {"access_token": access_token, "token_type": "bearer"}
 
