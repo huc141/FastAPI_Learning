@@ -29,8 +29,8 @@ app.mount(path='/coronavirus/static', app=StaticFiles(directory='./coronavirus/s
 app.include_router(app03, prefix='/chatpter03', tags=['第三章 请求参数和验证'])
 app.include_router(app04, prefix='/chatpter04', tags=['第四章 响应处理和FASTAPI配置'])
 app.include_router(app05, prefix='/chatpter05', tags=['第五章 FastAPI的依赖注入系统'])
-app.include_router(app06, prefix='/chatpter06', tags=['第六章 FastAPI'])
-app.include_router(app07, prefix='/chatpter07', tags=['第七章 FastAPI'])
+app.include_router(app06, prefix='/chatpter06', tags=['第六章 安全、认证和授权'])
+app.include_router(app07, prefix='/chatpter07', tags=['第七章 FastAPI的数据库和多应用的目录结构设计'])
 app.include_router(app08, prefix='/chatpter08', tags=['第八章 FastAPI'])
 
 # 使用了 Uvicorn 的 run 方法来启动应用程序。
