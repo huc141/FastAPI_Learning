@@ -23,5 +23,5 @@ engine = create_engine(
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine, expire_on_commit=True)
 
 
-# 创建基本的映射类
+# 创建基本的映射类, 在models.py文件中导入
 Base = declarative_base(bind=engine, name='Base')
