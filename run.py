@@ -3,6 +3,7 @@ from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 import uvicorn
 from tutorial import app03, app04, app05, app06, app07, app08
+from coronavirus import application
 
 
 """应用常见的配置项【见run.py文件】"""
@@ -31,6 +32,7 @@ app.include_router(app04, prefix='/chatpter04', tags=['第四章 响应处理和
 app.include_router(app05, prefix='/chatpter05', tags=['第五章 FastAPI的依赖注入系统'])
 app.include_router(app06, prefix='/chatpter06', tags=['第六章 安全、认证和授权'])
 app.include_router(app07, prefix='/chatpter07', tags=['第七章 FastAPI的数据库和多应用的目录结构设计'])
+app.include_router(application, prefix='/coronavirus', tags=['新冠病毒疫情跟踪器API'])
 app.include_router(app08, prefix='/chatpter08', tags=['第八章 FastAPI'])
 
 # 使用了 Uvicorn 的 run 方法来启动应用程序。

@@ -25,7 +25,7 @@ def get_cities(db: Session, skip: int = 0, limit: int = 10):
 # 第二个参数city: schemas.CreateCity是一个Pydantic模型，包含了创建城市所需的数据，如城市名称，所属省份等。
 def create_city(db: Session, city: schemas.CreateCity):
     # 使用city.dict将city对象转换为Python字典，并使用**操作符解包为关键字参数传递给models.City。这将创建一个City对象，其中的字段值将根据字典中的值进行设置。
-    db_city = models.City(**city.dict)
+    db_city = models.City(**city.dict())
     # 使用db.add()将City对象添加到数据库会话中
     db.add(db_city) 
     db.commit() # db.commit()提交对数据库的更改，将新创建的城市记录保存到数据库中
