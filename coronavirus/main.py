@@ -1,15 +1,19 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
-from coronavirus import crud, schemas
+from coronavirus import crud, schemas, models
 from coronavirus.database import engine, Base, SessionLocal
 from coronavirus.models import City, Data
 from typing import List
 
+"""集成和使用我们之前创建的所有其他部分"""
+
+models.Base.metadata.create_all(bind=engine)
+
 application = APIRouter()
 
-Base.metadata.create_all(bind=engine)
-
-
+# get_db: 该函数实现了一个数据库连接的上下文管理器，它返回一个通过 SessionLocal() 函数创建的本地数据库连接。
+# 在这个示例中，使用了 yield 关键字来创建一个 Python 生成器对象，以便在请求处理期间使用数据库连接。
+# 当请求处理完毕后，将自动关闭该数据库连接。
 def get_db():
     db = SessionLocal()
     try:
@@ -20,7 +24,7 @@ def get_db():
 
 @application.post("/create_city",response_model=schemas.ReadCity)
 def create_city(city:schemas.CreateCity, db: Session = Depends(get_db)):
-    db_city = crud.get_city_by_name(db=db, name=city.province)
+    db_city = crud.get_city_by_name(name=city.province, db=db)
     if db_city:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="城市已存在/已注册！")
     return crud.create_city(db=db, city=city)

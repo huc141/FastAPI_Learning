@@ -7,7 +7,7 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 
 
-# 建立sqlite数据库
+# 建立sqlite数据库，sqlite:///指定了使用SQLite数据库；./coronavirus.sqlite3指定了数据库文件的路径和名称。
 SQLALCHEMY_DATABASE_URL = "sqlite:///./coronavirus.sqlite3"
 # SQLALCHEMY_DATABASE_URL = "postgresql://username:password@host:port/database_name"
 
@@ -23,5 +23,6 @@ engine = create_engine(
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine, expire_on_commit=True)
 
 
-# 创建基本的映射类, 在models.py文件中导入
+# declarative_base函数创建了一个ORM基类，用于在应用程序中定义模型类，并将模型类与数据库表进行映射。
+# 这个基类提供了一个元数据（metadata）属性，可以用来配置ORM映射的相关信息，如表名、列名、数据类型等
 Base = declarative_base()
