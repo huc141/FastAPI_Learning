@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from datetime import datetime as date_
+from datetime import date as date_
 from datetime import datetime
 
 """建立与模型类对应的数据格式类"""
