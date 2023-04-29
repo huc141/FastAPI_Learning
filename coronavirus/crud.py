@@ -43,11 +43,12 @@ def create_city(db: Session, city: schemas.CreateCity):
 
 def get_data(db: Session, city: str = None, skip: int = 0, limit: int = 10):
     if city:
+    # 通过 db 进行查询，使用 filter 方法根据 city 所属的省/直辖市来筛选出符合条件的数据，
     # models.Data.city.has(province=city)是一个过滤条件，表示查询Data表中的city字段的值，
     # 如果该字段的province属性的值等于传入的city参数，就将该数据加入结果集。
     # 其中has()方法表示查询Data表中的city字段，它是一个关系属性，
     # 因此可以通过该方法来查询城市的省份属性。
-        return db.query(models.Data).filter(models.Data.city.has(province = city))
+        return db.query(models.Data).filter(models.Data.city.has(province = city)).all()  # all() 方法会将查询结果封装为一个列表对象。
     return db.query(models.Data).offset(skip).limit(limit).all()
 
 
