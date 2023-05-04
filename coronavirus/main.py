@@ -1,16 +1,18 @@
-from fastapi import APIRouter, Depends, HTTPException, status, Query
+from fastapi import APIRouter, Depends, HTTPException, status, Query, Request
 from sqlalchemy.orm import Session
 from coronavirus import crud, schemas, models
 from coronavirus.database import engine, Base, SessionLocal
 from coronavirus.models import City, Data
 from typing import List
-from pydantic import Field
+from fastapi.templating import Jinja2Templates
 
 """集成和使用我们之前创建的所有其他部分"""
 
 models.Base.metadata.create_all(bind=engine)
 
 application = APIRouter()
+
+templates = Jinja2Templates('./coronavirus/templates')
 
 # get_db: 该函数实现了一个数据库连接的上下文管理器，它返回一个通过 SessionLocal() 函数创建的本地数据库连接。
 # 在这个示例中，使用了 yield 关键字来创建一个 Python 生成器对象，以便在请求处理期间使用数据库连接。
@@ -74,3 +76,12 @@ def get_data(city: str = None, skip: int = 0, limit: int = Query(default=10, ge=
     data = crud.get_data(db=db, city=city, skip=skip, limit=limit)
     return data
 
+
+@application.get('/')
+def coronavirus(request: Request, city: str = None, skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
+    data = crud.get_data(db=db, city=city, skip=skip, limit=limit)
+    return templates.TemplateResponse("home.html", {
+        "request": request,
+        "data": data,
+        "sync_data_url": "/coronavirus/sync_coronavirus_data/jhu"
+    })
