@@ -96,12 +96,12 @@ async def sub_dependency(final_query: str = Depends(sub_query, use_cache=True)):
 # 对于这种情况，不必在声明路径操作函数的参数时使用 Depends，而是可以在路径操作装饰器中添加一个由 dependencies 组成的 list。
 # 路径操作装饰器依赖项的执行或解析方式和普通依赖项一样，但就算这些依赖项会返回值，它们的值也不会传递给路径操作函数。
 
-async def verify_token(x_token: str = Header()):
+async def verify_token(x_token: str = Header(...)):
     if x_token != "fake-super-secret-token":
         raise HTTPException(status_code=400, detail="X-Token header invalid")
 
 
-async def verify_key(x_key: str = Header()):
+async def verify_key(x_key: str = Header(...)):
     if x_key != "fake-super-secret-key":
         raise HTTPException(status_code=400, detail="X-Key header invalid")
     return x_key
